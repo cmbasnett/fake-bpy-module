@@ -409,6 +409,8 @@ class BaseGenerator:
         if len(data["params"]):
             file.write(", ".join(data["params"]))
         file.write("):\n")
+        if "desc" in data:
+            file.write(INDENT + "'''{0}'''".format(data["desc"]) + "\n")
         file.write(INDENT + "pass" + "\n")
         file.write("\n\n")
 
