@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as et
 import glob
 import re
-import pathlib
+import os
 import argparse
 
 
@@ -488,10 +488,10 @@ def build_mod_structure(xml_files):
 
 def make_mod_dirs(base_path, tables):
     for t in tables:
-        mod_name = base_path + "/" + t["mod"]
-        idx = mod_name.rfind("/")
-        dir_name = mod_name[:idx]
-        pathlib.Path(dir_name).mkdir(parents=True, exist_ok=True)
+        dir_name = os.path.splitext(t["mod"])[0]
+        dir_name = os.path.relpath(dir_name, INPUT_DIR)
+        dir_name = os.path.join(OUTPUT_DIR, dir_name)
+        os.makedirs(dir_name, exist_ok=True)
         if dir_name == base_path:
             continue
         with open(dir_name + "/__init__.py", "w"):
@@ -542,7 +542,8 @@ def gen_package(path, xml_files, analyzer, generator):
     # create modules
     for t in tables:
         r = analyzer.analyze(t["xml"])
-        generator.generate(path + "/" + t["mod"], r)
+        mod = os.path.relpath(t["mod"], INPUT_DIR)
+        generator.generate(path + "/" + mod, r)
 
 
 def gen_bpy_package():
