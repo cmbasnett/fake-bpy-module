@@ -475,10 +475,7 @@ def build_mod_structure(xml_files):
             s = ".".join(sp[1:])
             build(s, mod["children"])
 
-    raw = []
-    for f in xml_files:
-        idx = f.rfind("/")
-        raw.append(f[idx+1:-4])        # strip .xml
+    raw = [os.path.splitext(f)[0] for f in xml_files]
     modules = []
     for r in raw:
         build(r, modules)
@@ -494,14 +491,13 @@ def make_mod_dirs(base_path, tables):
         os.makedirs(dir_name, exist_ok=True)
         if dir_name == base_path:
             continue
-        with open(dir_name + "/__init__.py", "w"):
+        with open(os.path.join(dir_name, "__init__.py"), "w"):
             pass
 
 
 def find_mod(modules, xml_file):
-    idx = xml_file.rfind("/")
-    modname_raw = xml_file[idx+1:-4]        # strip .xml
-    modname_raw = re.sub("\.", "/", modname_raw)
+    modname_raw = os.path.splitext(xml_file)[0]
+    modname_raw = modname_raw.replace('.', os.altsep)
 
     def find(name, mods, raw):
         for m in mods:
@@ -510,7 +506,7 @@ def find_mod(modules, xml_file):
                 if len(m["children"]) == 0:
                     return mod_name + ".py"
                 else:
-                    return mod_name + "/__init__.py"
+                    return os.path.join(mod_name, "__init__.py")
             if len(m["children"]) > 0:
                 ret = find(mod_name + "/", m["children"], raw)
                 if ret:
